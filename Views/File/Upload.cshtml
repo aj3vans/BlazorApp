@@ -1,0 +1,10 @@
+﻿@model BlazorApp.ViewModels.FileUploadVm
+@{
+    ViewData["Title"] = "Upload File";
+}
+
+<form asp-controller="File" asp-action="Upload" enctype="multipart/form-data">
+    <h1>Upload File</h1>
+    <input asp-for="MyFiles" type="file" />
+    <button type="submit">Upload</button>
+</form>
