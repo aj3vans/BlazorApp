@@ -1,4 +1,6 @@
-﻿using BlazorApp.ViewModels;
+﻿using BlazorApp.Connections;
+using BlazorApp.Interfaces;
+using BlazorApp.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using System.Reflection;
 
@@ -7,27 +9,36 @@ namespace BlazorApp.Controllers
     [Route("File")]
     public class FileController : Controller
     {
-        //private readonly IFileService _uploadService;
+        private readonly IDbConn _conn;
 
-        //public FileController(IFileService uploadService)
-        //{
-        //    _uploadService = uploadService;
-        //}
+        public FileController(IDbConn conn)
+        {
+            _conn = conn;
+        }
         //--
 
         [HttpGet]
         [Route("Upload")]
-        public IActionResult Upload()
+        public async Task<IActionResult> Upload()
         {
             var viewModel = new FileUploadVm();
+
+            var conn = await _conn.Connect();
 
             return View(viewModel);
         }
 
         [HttpPost]
         [Route("Upload")]
-        public IActionResult Upload(FileUploadVm viewModel)
-        {
+        public async Task<IActionResult> Upload(FileUploadVm viewModel)
+        {           
+            //try
+            //{
+                
+            //}
+            //catch (IOException) { throw; }
+            //catch (Exception) { throw; }
+
             //Getting file meta data
             var fileName = Path.GetFileName(viewModel.MyFiles.FileName);
             var contentType = viewModel.MyFiles.ContentType;

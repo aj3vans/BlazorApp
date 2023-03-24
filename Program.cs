@@ -1,8 +1,13 @@
+using BlazorApp.Connections;
+using BlazorApp.Interfaces;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-builder.Services.AddServerSideBlazor(); 
+builder.Services.AddServerSideBlazor();
+
+builder.Services.AddScoped<IDbConn, DbConn>();
 
 var app = builder.Build();
 
