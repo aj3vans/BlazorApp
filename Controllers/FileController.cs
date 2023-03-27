@@ -1,29 +1,27 @@
-﻿using BlazorApp.Connections;
-using BlazorApp.Interfaces;
+﻿using BlazorApp.Interfaces;
+using BlazorApp.Models;
 using BlazorApp.ViewModels;
 using Microsoft.AspNetCore.Mvc;
-using System.Reflection;
+using System.IO;
 
 namespace BlazorApp.Controllers
 {
     [Route("File")]
     public class FileController : Controller
     {
-        private readonly IDbConn _conn;
+        private readonly IFileRepository _repo;
 
-        public FileController(IDbConn conn)
+        public FileController(IFileRepository repo)
         {
-            _conn = conn;
+            _repo = repo;
         }
         //--
 
         [HttpGet]
         [Route("Upload")]
-        public async Task<IActionResult> Upload()
+        public IActionResult Upload()
         {
             var viewModel = new FileUploadVm();
-
-            var conn = await _conn.Connect();
 
             return View(viewModel);
         }
@@ -31,39 +29,56 @@ namespace BlazorApp.Controllers
         [HttpPost]
         [Route("Upload")]
         public async Task<IActionResult> Upload(FileUploadVm viewModel)
-        {           
-            //try
-            //{
-                
-            //}
-            //catch (IOException) { throw; }
-            //catch (Exception) { throw; }
+        {
+            int maxSize = 10485760; //-- 10 Megabyte 
 
-            //Getting file meta data
-            var fileName = Path.GetFileName(viewModel.MyFiles.FileName);
-            var contentType = viewModel.MyFiles.ContentType;
+            try
+            {
+                if (viewModel.MyFiles.Count > 0)
+                {
+                    foreach (var myFile in viewModel.MyFiles)
+                    {
+                        // validate file size
+                        if (myFile.Length >= maxSize)
+                        {
+                            ModelState.AddModelError("File too large", $"{myFile.FileName} exceeds the maximum file size allowed for uploads.");
+                            return View(viewModel);
+                        }
 
-            return Content(fileName);
+                        var file = new FileModel();
+                        file.FileName = Path.GetFileNameWithoutExtension(myFile.FileName);
+                        file.FileExtension = Path.GetExtension(myFile.FileName);
+                        file.FileType = myFile.ContentType;
+                        file.FileSize = myFile.Length;
+
+                        using (var stream = new MemoryStream())
+                        {
+                            await myFile.CopyToAsync(stream);
+                            file.FileBinary = stream.ToArray();
+                        }
+
+                        file.FileId = await _repo.Save(file);
+                    }
+                    return Content($"You have successfully uploaded {viewModel.MyFiles.Count}.");
+                }
+                return Content("No file where uploaded.");
+            }
+            catch (IOException) { throw; }
+            catch (Exception) { throw; }
         }
 
-        /*
-         * download 
-         * 
-         try
-            {
-                var file =  dbContextClass.FileDetails.Where(x => x.ID == Id).FirstOrDefaultAsync();
+        [HttpGet]
+        [Route("Download")]
+        public async Task<IActionResult> Download(int id)
+        {
+            var file = await _repo.GetById(id);
 
-                var content = new System.IO.MemoryStream(file.Result.FileData);
-                var path = Path.Combine(
-                   Directory.GetCurrentDirectory(), "FileDownloaded",
-                   file.Result.FileName);
-
-                await CopyStream(content, path);
-            }
-            catch (Exception)
+            if (file.FileBinary != null && file.FileType != null) 
             {
-                throw;
+                return File(file.FileBinary, file.FileType, "Document_Title.pdf");
             }
-         */
+
+            return Content("File not found.");
+        }       
     }
 }

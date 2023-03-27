@@ -17,7 +17,7 @@ namespace BlazorApp.Repositories
 
         public async Task<FileModel> GetById(int fileId)
         {
-            var command = new SqlCommand("File-GetById");
+            var command = new SqlCommand("Files-GetById");
             command.CommandType = CommandType.StoredProcedure;
             command.Parameters.AddWithValue("@FileId", fileId);
 
@@ -40,6 +40,7 @@ namespace BlazorApp.Repositories
                         {
                             file.FileId = reader.GetInt32("FileId");
                             file.FileName = reader.GetString("FileName");
+                            file.FileType = reader.GetString("FileType");
                             file.FileBinary = (byte[])reader["FileBinary"];
                         }
                     }
@@ -51,7 +52,7 @@ namespace BlazorApp.Repositories
             catch (Exception) { throw; }
         }
 
-        public async Task<FileModel> Save(FileModel file)
+        public async Task<int> Save(FileModel file)
         {
             try
             {
@@ -61,11 +62,10 @@ namespace BlazorApp.Repositories
                     command.CommandType = CommandType.StoredProcedure;
                     command.Parameters.AddWithValue("@FileId", file.FileId);
                     command.Parameters.AddWithValue("@FileName", file.FileName);
+                    command.Parameters.AddWithValue("@FileType", file.FileType);
                     command.Parameters.AddWithValue("@FileBinary", file.FileBinary);
 
-                    file.FileId = Convert.ToInt32(await command.ExecuteScalarAsync());
-
-                    return file;
+                    return Convert.ToInt32(await command.ExecuteScalarAsync());
                 }
             }
             catch (SqlException) { throw; }

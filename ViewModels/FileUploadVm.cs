@@ -4,6 +4,6 @@
 
     public class FileUploadVm
     {
-        public IFormFile MyFiles { set; get; }
+        public List<IFormFile> MyFiles { set; get; }
     }
 }

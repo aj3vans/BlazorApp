@@ -4,7 +4,13 @@
 }
 
 <form asp-controller="File" asp-action="Upload" enctype="multipart/form-data">
+    
     <h1>Upload File</h1>
-    <input asp-for="MyFiles" type="file" />
+        
+    <input type="file"
+        asp-for="MyFiles"
+        accept="application/pdf, image/jpeg"
+        multiple />
+    
     <button type="submit">Upload</button>
 </form>

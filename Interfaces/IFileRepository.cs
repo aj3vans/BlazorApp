@@ -6,6 +6,6 @@ namespace BlazorApp.Interfaces
     {
         Task<FileModel> GetById(int fileId);
 
-        Task<FileModel> Save(FileModel file);
+        Task<int> Save(FileModel file);
     }
 }
