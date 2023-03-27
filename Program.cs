@@ -1,5 +1,6 @@
 using BlazorApp.Connections;
 using BlazorApp.Interfaces;
+using BlazorApp.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +9,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddServerSideBlazor();
 
 builder.Services.AddScoped<IDbConn, DbConn>();
+builder.Services.AddScoped<IFileRepository, FileRepository>();
 
 var app = builder.Build();
 
